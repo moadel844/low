@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ملف الموظف | إدارة المكتب</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=El+Messiri:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <style>
+    .profile-layout { display: grid; grid-template-columns: 350px 1fr; gap: 2rem; margin-top: 1rem; }
+    @media (max-width: 900px) { .profile-layout { grid-template-columns: 1fr; } }
+    
+    .side-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--line); padding: 2rem; text-align: center; box-shadow: var(--shadow-sm); }
+    .avatar-circle { width: 100px; height: 100px; border-radius: 50%; background: var(--brass); color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1rem; font-family: var(--font-head); border: 4px solid var(--surface); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .side-card h2 { margin: 0; font-size: 1.5rem; color: var(--indigo); }
+    .side-card .role-badge { display: inline-block; background: var(--brass-soft); color: var(--brass-deep); padding: 0.2rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.85rem; margin-top: 0.5rem; }
+    
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem; }
+    .stat-box { background: var(--paper); border-radius: 12px; padding: 1rem; border: 1px solid var(--line); text-align: center; }
+    .stat-box .num { font-size: 1.8rem; font-weight: 700; color: var(--indigo); font-family: var(--font-head); }
+    .stat-box .lbl { font-size: 0.8rem; color: var(--ink-soft); font-weight: 600; }
+    
+    .data-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
+    .data-table th, .data-table td { padding: 1rem; text-align: right; border-bottom: 1px solid var(--line); }
+    .data-table th { background: #f8f9fa; color: var(--ink-soft); font-weight: 600; } 
+    .data-table tr:hover td { background: #fafbfd; } 
+    
+    .badge-bonus { background: #dcfce7; color: #166534; padding: 0.2rem 0.6rem; border-radius: 6px; font-weight: bold; font-size: 0.8rem; }
+    .badge-penalty { background: #fee2e2; color: #991b1b; padding: 0.2rem 0.6rem; border-radius: 6px; font-weight: bold; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div id="app" hidden>
+    <header class="topbar">
+        <div class="brand">إدارة المكتب</div>
+        <div class="global-search-wrapper">
+            <input type="search" id="global-search-input" placeholder="بحث سريع..." autocomplete="off">
+            <div id="global-search-results" class="global-search-results"></div>
+        </div>
+        <nav class="topnav">
+            <a href="index.html"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>الرئيسية</span></a>
+            <a href="clients.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.7 4.5 4.3"/></svg><span>الموكلين</span></a>
+            <a href="cases.html"><svg class="ico" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 16h5"/></svg><span>القضايا</span></a>
+            <a href="agenda.html"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>الأجندة</span></a>
+            <a href="documents.html"><svg class="ico" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>الأرشيف</span></a>
+            <a href="reports.html"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>التقارير</span></a>
+            <a id="admin-link" href="admin.html" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 5 6v5.5c0 4.2 2.9 7.6 7 9.5 4.1-1.9 7-5.3 7-9.5V6l-7-3Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span>المدير</span></a>
+        </nav>
+        <div class="user-box">
+            <button class="theme-toggle" type="button"></button>
+            <span id="user-avatar" class="avatar"></span>
+            <span id="user-name"></span>
+            <span id="user-role" class="role-tag"></span>
+            <button id="logout-btn" type="button" class="btn btn-quiet">تسجيل الخروج</button>
+        </div>
+    </header>
+
+    <main class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1 id="page-title">ملف الموظف</h1>
+        <a href="achievements.html" class="btn inline ghost">&rarr; رجوع</a>
+      </div>
+
+      <p id="toast" class="alert toast" role="status" hidden></p>
+
+      <div class="profile-layout">
+        <!-- بطاقة الموظف -->
+        <div class="side-card">
+          <div class="avatar-circle" id="emp-avatar">-</div>
+          <h2 id="emp-name">جاري التحميل...</h2>
+          <div class="role-badge" id="emp-role">-</div>
+          
+          <div class="stats-grid">
+            <div class="stat-box"><div class="num" id="stat-cases">0</div><div class="lbl">قضايا</div></div>
+            <div class="stat-box"><div class="num" id="stat-tasks">0</div><div class="lbl">مهام مكتملة</div></div>
+            <div class="stat-box"><div class="num" id="stat-sessions">0</div><div class="lbl">جلسات</div></div>
+            <div class="stat-box"><div class="num" id="stat-days">0</div><div class="lbl">أيام حضور</div></div>
+          </div>
+
+          <div style="margin-top: 1.5rem; text-align: right; border-top: 1px dashed var(--line); padding-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span class="muted" style="font-size:0.9rem;">إجمالي المكافآت</span>
+              <strong style="color: #166534;" id="sum-bonus">0 ج.م</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span class="muted" style="font-size:0.9rem;">إجمالي الخصومات</span>
+              <strong style="color: #991b1b;" id="sum-penalty">0 ج.م</strong>
+            </div>
+          </div>
+
+          <button id="add-reward-btn" class="btn inline" style="width: 100%; margin-top: 1.5rem; background: var(--indigo);" hidden>+ إضافة مكافأة / خصم</button>
+        </div>
+
+        <!-- بيانات الموظف -->
+        <div>
+          <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 style="margin-top: 0; color: var(--indigo); border-bottom: 2px solid var(--paper); padding-bottom: 0.8rem;">سجل المكافآت والخصومات</h3>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>السبب</th></tr></thead>
+                <tbody id="rewards-list"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="padding: 1.5rem;">
+            <h3 style="margin-top: 0; color: var(--indigo); border-bottom: 2px solid var(--paper); padding-bottom: 0.8rem;">سجل الحضور والانصراف</h3>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead><tr><th>التاريخ</th><th>وقت الحضور</th><th>وقت الانصراف</th></tr></thead>
+                <tbody id="attendance-list"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- مودال إضافة مكافأة/خصم -->
+  <dialog id="reward-dialog" style="border: none; border-radius: 12px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2); background: var(--surface);">
+    <div class="dialog-body" style="padding: 2rem; max-width: 400px;">
+      <h2 style="margin-top: 0; color: var(--indigo);">إضافة مكافأة / خصم</h2>
+      <form id="reward-form">
+        <div class="field">
+          <label>النوع</label>
+          <select id="rw-type" style="width: 100%; padding: 0.8rem; border: 1px solid var(--line); border-radius: 8px;">
+            <option value="bonus">مكافأة (+)</option>
+            <option value="penalty">خصم (-)</option>
+          </select>
+        </div>
+        <div class="field" style="margin-top: 1rem;">
+          <label>المبلغ (ج.م)</label>
+          <input type="number" id="rw-amount" required min="1" style="width: 100%; padding: 0.8rem; border: 1px solid var(--line); border-radius: 8px;">
+        </div>
+        <div class="field" style="margin-top: 1rem;">
+          <label>السبب</label>
+          <input type="text" id="rw-reason" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--line); border-radius: 8px;">
+        </div>
+        <p id="rw-error" class="alert" hidden style="margin-top: 1rem;"></p>
+        <div class="row" style="justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="submit" class="btn inline">حفظ</button>
+          <button type="button" class="btn inline ghost" onclick="document.getElementById('reward-dialog').close()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/global-search.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/loader.js"></script>
+  <script src="js/attendance.js"></script>
+  <script src="js/employee.js"></script>
+    <script src="js/attendance.js"></script>
+</body>
+</html>

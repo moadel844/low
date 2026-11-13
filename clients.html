@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الموكلين | المستشار</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=El+Messiri:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    .folder-tabs-container { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.5rem; border-bottom: 2px solid var(--line); padding-bottom: 0; position: relative; padding-top: 10px; }
+    .folder-tab { background: var(--paper); border: 1px solid var(--line); border-bottom: none; border-radius: 10px 10px 0 0; padding: 0.5rem 1rem; cursor: pointer; font-weight: 700; font-size: 1.1rem; color: var(--ink-soft); transition: all 0.2s ease; position: relative; top: 2px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.03); min-width: 45px; }
+    .folder-tab:hover { transform: translateY(-3px); color: var(--ink); z-index: 15; }
+    .folder-tab.active { background: var(--surface); color: var(--ink); border-bottom: 2px solid var(--surface); top: 1px; z-index: 20; box-shadow: 0 -3px 10px rgba(0,0,0,0.08); transform: translateY(0) scale(1.05); }
+    [data-theme="dark"] .folder-tab { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    [data-theme="dark"] .folder-tab.active { background: var(--surface); color: var(--brass); border-color: var(--line); border-bottom-color: var(--surface); }
+    .data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 0 12px 12px 12px; overflow: hidden; box-shadow: var(--shadow); margin-top: 0; }
+    .data-table th, .data-table td { padding: 1rem; text-align: right; border-bottom: 1px solid var(--line); }
+    .data-table th { background: var(--paper); color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+    .data-table tr:hover td { background: var(--paper); }
+    .data-table td { color: var(--ink); font-size: 0.95rem; }
+    .table-responsive { overflow-x: auto; }
+    .profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: var(--surface); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .profile-header h2 { margin: 0; font-size: 1.8rem; }
+    .mini-cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 1rem; }
+    .mini-case-card { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 0.8rem; cursor: pointer; transition: 0.2s; border-right: 3px solid var(--indigo); }
+    .mini-case-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--brass); }
+    .mini-case-card h5 { margin: 0 0 0.3rem; font-size: 0.95rem; color: var(--indigo); }
+    .mini-case-card p { margin: 0; font-size: 0.8rem; color: var(--ink-soft); }
+    .wa-btn { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #25D366; color: white; text-decoration: none; margin-right: 0.5rem; transition: 0.2s; }
+    .wa-btn:hover { transform: scale(1.1); filter: brightness(1.1); }
+    .wa-btn svg { width: 14px; height: 14px; fill: currentColor; }
+    .empty { padding: 2rem; text-align: center; color: var(--ink-soft); background: var(--surface); border: 1px dashed var(--field-line); border-radius: var(--r); }
+    .letter-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-weight: bold; color: #fff; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <div id="app" hidden>
+    <header class="topbar">
+        <div class="brand">المستشار</div>
+        <div class="global-search-wrapper">
+            <input type="search" id="global-search-input" placeholder="بحث سريع..." autocomplete="off">
+            <div id="global-search-results" class="global-search-results"></div>
+        </div>
+        <nav class="topnav">
+            <a href="index.html"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>الرئيسية</span></a>
+            <a href="clients.html" aria-current="page"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.7 4.5 4.3"/></svg><span>الموكلين</span></a>
+            <a href="cases.html"><svg class="ico" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 16h5"/></svg><span>القضايا</span></a>
+            <a href="agenda.html"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>الأجندة</span></a>
+            <a href="documents.html"><svg class="ico" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>الأرشيف</span></a>
+            <a href="reports.html"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>التقارير</span></a>
+            <a id="admin-link" href="admin.html" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 5 6v5.5c0 4.2 2.9 7.6 7 9.5 4.1-1.9 7-5.3 7-9.5V6l-7-3Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span>المدير</span></a>
+        </nav>
+        <div class="user-box">
+            <button class="theme-toggle" type="button"></button>
+            <a href="profile.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;" title="ملفي الشخصي">
+            <span id="user-avatar" class="avatar"></span>
+           <span id="user-name"></span>
+            </a>
+            <span id="user-role" class="role-tag"></span>
+            <button id="logout-btn" type="button" class="btn btn-quiet">تسجيل الخروج</button>
+        </div>
+    </header>
+
+    <main class="container">
+      <p id="toast" class="alert toast" role="status" hidden></p>
+
+      <div id="list-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <h1>الموكلين</h1>
+            <p class="muted">إدارة بيانات الموكلين، التوكيلات، والمستندات.</p>
+          </div>
+          <button id="new-client" type="button" class="btn inline">+ إضافة موكل جديد</button>
+        </div>
+
+        <div class="folder-tabs-container" id="folders-container"></div>
+
+        <div class="toolbar" style="margin-bottom: 1rem; display: flex;">
+          <input id="search" type="search" placeholder="ابحث بالاسم، الرقم القومي، أو الموبايل..." style="flex: 1;">
+        </div>
+
+        <div class="table-responsive card" style="padding: 0; border-radius: 0 12px 12px 12px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>الرقم القومي</th>
+                <th>الموبايل</th>
+                <th>حرف التوكيل</th>
+                <th>رقم التوكيل</th>
+                <th>آخر إجراء / جلسة</th>
+                <th>المحافظة / المدينة</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="clients-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="detail-view" hidden>
+        <button type="button" class="btn inline ghost" onclick="showList()" style="margin-bottom: 1rem;">&rarr; رجوع للقائمة</button>
+        
+        <div class="profile-header">
+          <div>
+            <h2 id="d-name">اسم الموكل</h2>
+            <div class="muted" style="margin-top: 0.5rem;" id="d-info-line"></div>
+          </div>
+          <div class="row" style="margin: 0;">
+            <button type="button" class="btn inline ghost" onclick="editCurrentClient()">تعديل البيانات</button>
+            <button type="button" class="btn inline danger" onclick="deleteCurrentClient()">حذف</button>
+          </div>
+        </div>
+
+        <div class="detail-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+          <div>
+            <div class="info-card">
+              <h3>البيانات الأساسية</h3>
+              <div class="kv-grid" id="d-info"></div>
+            </div>
+            
+            <div class="info-card">
+              <h3>مستندات الموكل</h3>
+              <div class="row" style="margin-top: 0; margin-bottom: 1rem;">
+                <button type="button" class="btn inline ghost" onclick="document.getElementById('d-file-docs').click()">إضافة مستند</button>
+                <input id="d-file-docs" type="file" multiple hidden>
+              </div>
+              <ul id="d-docs-list" class="docs"></ul>
+            </div>
+          </div>
+
+          <div>
+            <div class="info-card">
+              <h3 style="display: flex; justify-content: space-between; align-items: center;">
+                <span>التوكيلات</span>
+                <button type="button" class="btn small" onclick="openPoaDialog(null)">+ إضافة توكيل</button>
+              </h3>
+              <div id="d-poas-list"></div>
+            </div>
+
+            <div class="info-card">
+              <h3 style="display: flex; justify-content: space-between; align-items: center;">
+                <span>القضايا المرتبطة</span>
+                <button type="button" class="btn small ghost" onclick="openLinkCaseDialog()">+ ربط بقضية</button>
+              </h3>
+              <div id="d-cases-list" class="mini-cases-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="link-case-dialog">
+    <div class="dialog-body" style="max-width: 400px;">
+      <h2 style="margin-top: 0; color: var(--ink);">ربط الموكل بقضية</h2>
+      <form id="link-case-form">
+        <div class="field"><label>اختر القضية من المكتب</label><select id="link-case-select" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></select></div>
+        <div class="row" style="justify-content: flex-end; margin-top: 1rem;">
+          <button type="submit" class="btn inline" style="background: var(--indigo);">ربط</button>
+          <button type="button" class="btn inline ghost" onclick="document.getElementById('link-case-dialog').close()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="client-dialog">
+    <div class="dialog-body">
+      <h2 id="client-dialog-title"></h2>
+      <form id="client-form" novalidate>
+        <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="field"><label for="f-name">الاسم الكامل</label><input id="f-name" type="text" maxlength="120" required></div>
+          <div class="field"><label for="f-nid">الرقم القومي</label><input id="f-nid" type="text" inputmode="numeric" dir="ltr" maxlength="20"></div>
+          <div class="field"><label for="f-phone">الموبايل</label><input id="f-phone" type="tel" dir="ltr"></div>
+          <div class="field"><label for="f-wa">واتساب</label><input id="f-wa" type="tel" dir="ltr"></div>
+          <div class="field"><label for="f-email">البريد الإلكتروني</label><input id="f-email" type="email" dir="ltr"></div>
+          <div class="field"><label for="f-gov">المحافظة</label><select id="f-gov"><option value="">— اختر المحافظة —</option></select></div>
+          <div class="field"><label for="f-city">المدينة / المركز</label><select id="f-city"><option value="">— اختر المحافظة أولاً —</option></select></div>
+          <div class="field" style="grid-column: 1 / -1"><label for="f-address">العنوان التفصيلي</label><input id="f-address" type="text" maxlength="250"></div>
+        </div>
+        <div class="field" style="margin-top:.9rem"><label for="f-notes">ملاحظات</label><textarea id="f-notes" maxlength="2000"></textarea></div>
+        <p id="client-error" class="alert" role="alert" hidden></p>
+        <div class="row" style="position: sticky; bottom: -1.4rem; background: var(--surface); padding: 1rem 0; margin-top: 1.5rem; border-top: 1px solid var(--line); z-index: 10; justify-content: flex-end;">
+          <button id="client-save" type="submit" class="btn inline">حفظ</button>
+          <button type="button" class="btn inline ghost" data-close>إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="poa-dialog">
+    <div class="dialog-body">
+      <h2 id="poa-dialog-title"></h2>
+      <form id="poa-form" novalidate>
+        <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="field"><label for="p-letter">حرف التوكيل</label><select id="p-letter"><option value="">— بدون حرف —</option></select></div>
+          <div class="field"><label for="p-number">رقم التوكيل</label><input id="p-number" type="text" maxlength="60" required></div>
+          <div class="field"><label for="p-type">نوع التوكيل</label><select id="p-type"><option value="general">عام</option><option value="special">خاص</option></select></div>
+          <div class="field"><label for="p-date">سنة التوكيل</label><input id="p-date" type="number" min="1900" max="2100" placeholder="مثال: 2024"></div>
+          <div class="field"><label for="p-office">مكتب التوثيق</label><input id="p-office" type="text" maxlength="120"></div>
+          <div class="field"><label for="p-status">الحالة</label><select id="p-status"><option value="active">ساري</option><option value="revoked">ملغي</option><option value="expired">منتهي</option></select></div>
+        </div>
+        <div class="field" style="margin-top:.9rem"><label for="p-scope">نطاق التوكيل</label><textarea id="p-scope" maxlength="2000"></textarea></div>
+        <p id="poa-error" class="alert" role="alert" hidden></p>
+        <div class="row" style="position: sticky; bottom: -1.4rem; background: var(--surface); padding: 1rem 0; margin-top: 1.5rem; border-top: 1px solid var(--line); z-index: 10; justify-content: flex-end;">
+          <button id="poa-save" type="submit" class="btn inline">حفظ</button>
+          <button type="button" class="btn inline ghost" data-close>إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/global-search.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/loader.js"></script> 
+   <script src="js/realtime-notifications.js"></script>
+  <!-- ضفت ?v=2 هنا عشان نكسر الكاش -->
+  <script src="js/clients.js?v=2"></script>
+  <script src="js/requests.js"></script>
+    <script src="js/attendance.js"></script>
+</body>
+</html>

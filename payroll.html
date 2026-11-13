@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>نظام الرواتب | إدارة المكتب</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=El+Messiri:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <style>
+    .payroll-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start; }
+    @media (max-width: 900px) { .payroll-grid { grid-template-columns: 1fr; } }
+    .payroll-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-sm); }
+    .payroll-card h3 { margin-top: 0; color: var(--indigo); border-bottom: 2px solid var(--paper); padding-bottom: 0.8rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; }
+    
+    .data-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
+    .data-table th, .data-table td { padding: 1rem; text-align: right; border-bottom: 1px solid var(--line); }
+    .data-table th { background: #f8f9fa; color: var(--ink-soft); font-weight: 600; white-space: nowrap; } 
+    .data-table tr:hover td { background: #fafbfd; } 
+    
+    .net-salary { color: #166534; font-weight: bold; font-size: 1.1rem; }
+    .deduction { color: var(--stamp); font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand">إدارة المكتب</div>
+      <div class="global-search-wrapper">
+        <input type="search" id="global-search-input" placeholder="بحث سريع..." autocomplete="off">
+        <div id="global-search-results" class="global-search-results"></div>
+      </div>
+      <nav class="topnav">
+        <a href="index.html"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>الرئيسية</span></a>
+        <a href="clients.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.7 4.5 4.3"/></svg><span>الموكلين</span></a>
+        <a href="cases.html"><svg class="ico" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 16h5"/></svg><span>القضايا</span></a>
+        <a href="agenda.html"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>الأجندة</span></a>
+        <a href="documents.html"><svg class="ico" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>الأرشيف</span></a>
+        <a href="reports.html"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>التقارير</span></a>
+        <a id="admin-link" href="admin.html" aria-current="page"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 5 6v5.5c0 4.2 2.9 7.6 7 9.5 4.1-1.9 7-5.3 7-9.5V6l-7-3Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span>المدير</span></a>
+      </nav>
+      <div class="user-box">
+        <button class="theme-toggle" type="button"></button>
+        <span id="user-avatar" class="avatar"></span>
+        <span id="user-name"></span>
+        <span id="user-role" class="role-tag"></span>
+        <button id="logout-btn" type="button" class="btn btn-quiet">تسجيل الخروج</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+          <h1>نظام الرواتب</h1>
+          <p class="muted">إدارة رواتب الموظفين والخصومات.</p>
+        </div>
+        <a href="admin.html" class="btn inline ghost">&rarr; العودة لصفحة المدير</a>
+      </div>
+      
+      <p id="toast" class="alert toast" role="status" hidden></p>
+
+      <div class="payroll-grid">
+        <!-- فورم إضافة الراتب -->
+        <div class="payroll-card">
+          <h3>إضافة راتب / خصم جديد</h3>
+          <form id="payroll-form">
+            <div class="field">
+              <label>الموظف</label>
+              <select id="p-employee" required></select>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="field">
+                <label>الشهر</label>
+                <select id="p-month" required>
+                  <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
+                  <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
+                  <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
+                  <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>السنة</label>
+                <input type="number" id="p-year" required min="2020" max="2100">
+              </div>
+            </div>
+            <div class="field">
+              <label>الراتب الأساسي (ج.م)</label>
+              <input type="number" id="p-base" required min="0" placeholder="مثال: 5000">
+            </div>
+            <div class="field">
+              <label>الخصم (ج.م) - اتركه 0 لو مفيش</label>
+              <input type="number" id="p-deduction" min="0" value="0">
+            </div>
+            <div class="field">
+              <label>سبب الخصم (إن وجد)</label>
+              <input type="text" id="p-reason" placeholder="مثال: تأخير، غياب بدون إذن...">
+            </div>
+            
+            <button type="submit" class="btn inline" style="width: 100%; margin-top: 1rem;">حفظ وإرسال إشعار</button>
+          </form>
+        </div>
+
+        <!-- جدول الرواتب السابقة -->
+        <div class="payroll-card">
+          <h3>سجل الرواتب</h3>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>الموظف</th>
+                  <th>الشهر/السنة</th>
+                  <th>الأساسي</th>
+                  <th>الخصم</th>
+                  <th>الصافي</th>
+                  <th>السبب</th>
+                </tr>
+              </thead>
+              <tbody id="payroll-list">
+                <!-- سيتم تعبئته بواسطة JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/global-search.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/loader.js"></script>
+   <script src="js/realtime-notifications.js"></script>
+  <script src="js/payroll.js"></script>
+</body>
+</html>

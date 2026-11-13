@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الصفحة غير موجودة | المستشار</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=El+Messiri:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <style>
+    .error-container {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 80vh; text-align: center; padding: 2rem;
+    }
+    .error-code {
+      font-size: 8rem; font-family: var(--font-head); font-weight: 700;
+      color: var(--indigo); line-height: 1; margin: 0;
+      text-shadow: 0 10px 20px rgba(14, 22, 49, 0.1);
+    }
+    .error-title { font-size: 2rem; color: var(--ink); margin: 1rem 0 0.5rem; }
+    .error-text { color: var(--ink-soft); font-size: 1.1rem; max-width: 400px; margin-bottom: 2rem; }
+    .error-btn { 
+      padding: 0.8rem 2rem; font-size: 1.1rem; border-radius: 10px; 
+      background: var(--indigo); color: #fff; text-decoration: none; font-weight: bold;
+      transition: 0.2s; box-shadow: 0 4px 6px rgba(14, 22, 49, 0.2);
+    }
+    .error-btn:hover { background: var(--indigo-soft); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(14, 22, 49, 0.3); }
+    .error-svg { width: 120px; height: 120px; stroke: var(--brass); margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <svg class="error-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v18"></path><path d="M8 21h8"></path><path d="M12 3l8 5"></path><path d="M12 3l-8 5"></path>
+      <path d="M4 8l-2 6h4z"></path><path d="M20 8l-2 6h4z"></path><path d="M2 14a3 3 0 0 0 6 0"></path>
+      <path d="M16 14a3 3 0 0 0 6 0"></path><circle cx="12" cy="3" r="1.5"></circle>
+    </svg>
+    <h1 class="error-code">404</h1>
+    <h2 class="error-title">عذراً، الصفحة غير موجودة</h2>
+    <p class="error-text">يبدو أنك وصلت إلى رابط غير صحيح أو أن هذه الصفحة تم نقلها. يمكنك العودة إلى الصفحة الرئيسية للمتابعة.</p>
+    <a href="index.html" class="error-btn">العودة للرئيسية</a>
+  </div>
+</body>
+</html>

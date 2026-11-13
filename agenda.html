@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الأجندة القضائية | المستشار</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=El+Messiri:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    body {
+      background-color: #f5f3ee;
+      background-image: radial-gradient(#e0dcd3 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* حاوية الأجندة */
+    .notebook-container {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 0;
+      position: relative;
+      background: var(--surface);
+      border-radius: 20px;
+      box-shadow: 0 20px 50px -10px rgba(14, 22, 49, 0.15);
+      max-width: 1200px;
+      margin: 2rem auto;
+      min-height: 750px;
+      border: 1px solid #e5dfd3;
+    }
+
+    @media (max-width: 1000px) {
+      .notebook-container { grid-template-columns: 1fr; border-radius: 12px; margin: 1rem; }
+      .side-tabs { display: none; }
+    }
+
+    /* العمود الأيسر (التقويم) */
+    .calendar-page {
+      padding: 2rem 3rem 2rem 2rem;
+      background: var(--surface);
+      border-radius: 0 20px 20px 0;
+      border-left: 2px solid #e5dfd3;
+    }
+
+    /* العمود الأيمن (التفاصيل) */
+    .details-page {
+      padding: 2rem 2rem 2rem 3rem;
+      background: #fdfbf7;
+      border-radius: 20px 0 0 20px;
+      position: relative;
+    }
+
+    /* شريط الشهور الجانبي (Side Tabs) */
+    .side-tabs {
+      position: absolute;
+      left: -35px;
+      top: 50px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .side-tab {
+      width: 45px; height: 70px;
+      border-radius: 8px 0 0 8px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-right: none;
+      writing-mode: vertical-rl;
+      text-align: center;
+      font-weight: 600; font-size: 0.85rem;
+      color: var(--ink-soft);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.2s;
+      box-shadow: -2px 2px 5px rgba(0,0,0,0.02);
+      font-family: var(--font-head);
+    }
+    .side-tab.active, .side-tab:hover {
+      background: var(--indigo);
+      color: #fff;
+      border-color: var(--indigo);
+      width: 50px; left: -5px; position: relative;
+      box-shadow: -2px 2px 8px rgba(14, 22, 49, 0.2);
+    }
+
+    /* التقويم (Calendar Grid) */
+    .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .cal-header h2 { font-family: var(--font-head); font-size: 2.2rem; color: var(--indigo); margin: 0; letter-spacing: -0.5px; }
+    
+    .cal-nav { display: flex; gap: 0.5rem; background: var(--paper); border-radius: 20px; padding: 5px; border: 1px solid var(--line); }
+    .cal-nav button { background: transparent; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: var(--indigo); font-size: 1.2rem; display: grid; place-items: center; transition: 0.2s; }
+    .cal-nav button:hover { background: var(--surface); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 1rem; }
+    .cal-weekdays div { text-align: center; font-weight: 700; color: var(--ink-soft); font-size: 0.9rem; }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+    
+    .cal-cell {
+      background: var(--surface);
+      border: 1px solid #f0ebe1;
+      border-radius: 12px;
+      padding: 0.8rem 0.5rem;
+      display: flex; flex-direction: column;
+      align-items: center;
+      min-height: 90px;
+      cursor: pointer; transition: 0.2s;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+    }
+    .cal-cell:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(14, 22, 49, 0.08); border-color: var(--brass-soft); }
+    .cal-cell.other-month { opacity: 0.3; background: transparent; border-color: transparent; box-shadow: none; cursor: default; }
+    .cal-cell.other-month:hover { transform: none; box-shadow: none; }
+
+    .day-num { font-size: 1.2rem; font-weight: 700; color: var(--ink); }
+    .cal-cell.today .day-num { background: var(--brass); color: #fff; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; box-shadow: 0 3px 8px rgba(193, 154, 75, 0.4); }
+    
+    .cal-cell.selected { background: var(--indigo); border-color: var(--indigo); box-shadow: 0 8px 20px rgba(14, 22, 49, 0.25); }
+    .cal-cell.selected .day-num { color: #fff; }
+    .cal-cell.selected .dots { border-top-color: rgba(255,255,255,0.2); }
+    .cal-cell.selected .dot { background: var(--brass); }
+
+    .cal-cell.holiday { background: #fff5f5; border-color: #fecaca; }
+    .cal-cell.selected.holiday { background: var(--indigo); }
+    .holiday-name { font-size: 0.65rem; color: var(--stamp); line-height: 1.2; text-align: center; margin-top: 0.2rem; font-weight: 600; }
+    .cal-cell.selected .holiday-name { color: #fca5a5; }
+
+    .dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: auto; padding-top: 0.5rem; justify-content: center; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brass); }
+
+    /* تفاصيل اليوم (العمود الأيمن) */
+    .day-details-header { border-bottom: 2px dashed #e5dfd3; padding-bottom: 1rem; margin-bottom: 1rem; }
+    .day-details-header h3 { margin: 0; font-size: 1.4rem; color: var(--indigo); font-family: var(--font-head); }
+    .day-details-header p { margin: 0.3rem 0 0; font-size: 0.9rem; color: var(--ink-soft); }
+
+    .hearing-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }
+    .hearing-item {
+      background: var(--surface); border: 1px solid #f0ebe1; border-radius: 12px;
+      padding: 1rem; border-right: 4px solid var(--indigo);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      transition: 0.2s; cursor: pointer;
+    }
+    .hearing-item:hover { border-color: #e5dfd3; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .hearing-item.custom-event { border-right-color: #1f7a5a; background: #f0fdf4; border-color: #bbf7d0; }
+    
+    .hearing-title { font-weight: 700; color: var(--indigo); font-size: 1rem; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem; }
+    .hearing-client { font-size: 0.85rem; color: var(--ink-soft); display: flex; align-items: center; gap: 0.4rem; }
+    .hearing-court { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem; margin-top: 0.5rem; }
+    
+    .tag { background: var(--paper); border: 1px solid var(--line); padding: 0.1rem 0.5rem; border-radius: 6px; font-size: 0.75rem; color: var(--ink-soft); }
+
+    /* أزرار التولبار */
+    .agenda-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .view-toggles { display: flex; background: var(--paper); border-radius: 10px; padding: 4px; border: 1px solid var(--line); }
+    .view-toggles button { border: 0; background: transparent; padding: 0.4rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; color: var(--ink-soft); transition: 0.2s; font-family: inherit; font-size: 0.9rem; }
+    .view-toggles button.active { background: var(--surface); color: var(--indigo); box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+
+    .legend { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 2rem; align-items: center; font-weight: 500; }
+    .legend span { display: flex; align-items: center; gap: 0.4rem; }
+    .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.civil { background: var(--indigo); } .dot.criminal { background: var(--stamp); } .dot.family { background: var(--brass); } .dot.event { background: #1f7a5a; }
+    
+    .wa-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #25D366; color: white; text-decoration: none; transition: 0.2s; }
+    .wa-btn:hover { transform: scale(1.1); }
+    .wa-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    .empty-day { padding: 3rem 1rem; text-align: center; color: var(--ink-soft); display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .empty-day svg { width: 50px; height: 50px; stroke: var(--brass-soft); }
+
+    [data-theme="dark"] body { background-color: #0f172a; background-image: radial-gradient(#1e293b 1px, transparent 1px); }
+    [data-theme="dark"] .notebook-container { background: #1e293b; border-color: #334155; }
+    [data-theme="dark"] .calendar-page { border-left-color: #334155; }
+    [data-theme="dark"] .details-page { background: #1e293b; }
+    [data-theme="dark"] .cal-cell { background: #0f172a; border-color: #334155; }
+    [data-theme="dark"] .cal-cell.selected { background: var(--indigo-soft); border-color: var(--indigo-soft); }
+    [data-theme="dark"] .cal-header h2 { color: #fff; }
+    [data-theme="dark"] .side-tab { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    [data-theme="dark"] .side-tab.active { background: var(--brass); color: #000; border-color: var(--brass); }
+  </style>
+</head>
+<body>
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand">المستشار</div>
+      <div class="global-search-wrapper">
+        <input type="search" id="global-search-input" placeholder="بحث سريع..." autocomplete="off">
+        <div id="global-search-results" class="global-search-results"></div>
+      </div>
+      <nav class="topnav">
+        <a href="index.html"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>الرئيسية</span></a>
+        <a href="clients.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.7 4.5 4.3"/></svg><span>الموكلين</span></a>
+        <a href="cases.html"><svg class="ico" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 16h5"/></svg><span>القضايا</span></a>
+        <a href="agenda.html" aria-current="page"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>الأجندة</span></a>
+        <a href="documents.html"><svg class="ico" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>الأرشيف</span></a>
+        <a href="reports.html"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>التقارير</span></a>
+        <a id="admin-link" href="admin.html" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 5 6v5.5c0 4.2 2.9 7.6 7 9.5 4.1-1.9 7-5.3 7-9.5V6l-7-3Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span>المدير</span></a>
+      </nav>
+      <div class="user-box">
+        <button class="theme-toggle" type="button"></button>
+        <a href="profile.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;" title="ملفي الشخصي">
+        <span id="user-avatar" class="avatar"></span>
+         <span id="user-name"></span>
+        </a>
+        <span id="user-role" class="role-tag"></span>
+        <button id="logout-btn" type="button" class="btn btn-quiet">تسجيل الخروج</button>
+      </div>
+    </header>
+
+    <main class="container" style="max-width: 100%; padding: 1rem 2rem;">
+      <p id="toast" class="alert toast" role="status" hidden></p>
+      
+      <div class="agenda-toolbar">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <div class="view-toggles">
+            <button id="btn-view-month" class="active" onclick="toggleView('month')">شهر</button>
+            <button id="btn-view-week" onclick="toggleView('week')">أسبوع</button>
+          </div>
+          <select id="filter-lawyer" style="padding: 0.5rem; border-radius: 8px; border: 1px solid var(--line); font-family: inherit; font-weight: 600; color: var(--indigo);" onchange="renderCalendar()">
+            <option value="">كل المحامين</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn inline ghost" onclick="openEventModal()" style="color: #1f7a5a; border-color: #1f7a5a; background: #fff;">+ إضافة ميعاد / مهمة</button>
+          <button class="btn inline ghost" onclick="window.print()" style="background: #fff;">طباعة</button>
+        </div>
+      </div>
+
+      <div class="legend">
+        <strong style="color: var(--indigo);">دليل الألوان:</strong>
+        <span><span class="dot civil"></span> قضية مدني/تجاري</span>
+        <span><span class="dot criminal"></span> قضية جنائية</span>
+        <span><span class="dot family"></span> قضية أسرة</span>
+        <span><span class="dot event"></span> ميعاد / مهمة</span>
+      </div>
+
+      <div class="notebook-container">
+        <!-- صفحة التقويم (اليمين) -->
+        <div class="calendar-page">
+          <div class="cal-header">
+            <h2 id="month-year-display">التقويم</h2>
+            <div class="cal-nav">
+              <button id="prev-month" title="السابق">&rarr;</button>
+              <button id="next-month" title="التالي">&larr;</button>
+            </div>
+          </div>
+          <div class="cal-weekdays">
+            <div>الأحد</div><div>الإثنين</div><div>الثلاثاء</div><div>الأربعاء</div><div>الخميس</div><div>الجمعة</div><div>السبت</div>
+          </div>
+          <div class="cal-grid" id="calendar-grid"></div>
+        </div>
+
+        <!-- صفحة التفاصيل (الشمال) -->
+        <div class="details-page">
+          <!-- شريط الشهور الجانبي (هيتولد تلقائي) -->
+          <div class="side-tabs" id="side-tabs-container"></div>
+
+          <div class="day-details-header">
+            <h3 id="selected-date-title">جلسات اليوم</h3>
+            <p id="selected-date-subtitle">اختر يوماً من التقويم</p>
+          </div>
+          <div id="holiday-banner-container"></div>
+          <ul class="hearing-list" id="day-hearings-list"></ul>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="event-dialog">
+    <div class="dialog-body" style="max-width: 450px;">
+      <h2 style="margin-top: 0; color: var(--ink);">إضافة ميعاد / مهمة جديدة</h2>
+      <form id="event-form">
+        <div class="field"><label>العنوان</label><input type="text" id="e-title" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="field"><label>التاريخ</label><input type="date" id="e-date" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+          <div class="field"><label>الوقت (اختياري)</label><input type="time" id="e-time" style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+        </div>
+        <div class="field" style="margin-top: 1rem;"><label>ملاحظات</label><textarea id="e-notes" style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px; min-height: 80px;"></textarea></div>
+        <p id="event-error" class="alert" hidden></p>
+        <div class="row" style="justify-content: flex-end; margin-top: 1rem;">
+          <button type="submit" class="btn inline" style="background: #1f7a5a; border-color: #1f7a5a;">حفظ الميعاد</button>
+          <button type="button" class="btn inline ghost" onclick="document.getElementById('event-dialog').close()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/global-search.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/loader.js"></script> 
+   <script src="js/realtime-notifications.js"></script>
+  <script src="js/agenda.js"></script>
+  <script src="js/requests.js"></script>
+  <script src="js/attendance.js"></script>
+</body>
+</html>

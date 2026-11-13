@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تسجيل الدخول | المستشار</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=El+Messiri:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+  <main class="page-center">
+    <section class="panel">
+      <h1>المستشار</h1>
+      <p class="lead">سجّل دخولك لمتابعة الموكلين والقضايا والجلسات.</p>
+      
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="email">البريد الإلكتروني</label>
+          <input id="email" type="email" dir="ltr" required>
+        </div>
+        <div class="field">
+          <label for="password">كلمة المرور</label>
+          <input id="password" type="password" dir="ltr" required>
+        </div>
+        
+        <!-- زرار الدخول -->
+        <button id="login-btn" type="submit" class="btn">تسجيل الدخول</button>
+
+        <!-- لينك نسيت كلمة المرور -->
+        <div style="text-align: center; margin-top: 1.2rem;">
+          <a href="#" id="forgot-password-link" style="font-size: 0.9rem; color: var(--indigo-soft); text-decoration: none; transition: 0.2s;">نسيت كلمة المرور؟</a>
+        </div>
+
+        <p id="msg" class="alert" role="alert" hidden style="margin-top: 1rem;"></p>
+      </form>
+    </section>
+  </main>
+  
+  <!-- نافذة إعادة تعيين كلمة المرور -->
+  <dialog id="reset-dialog" style="border: none; border-radius: 12px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2); background: var(--surface);">
+    <div class="dialog-body" style="padding: 2rem; max-width: 400px;">
+      <h2 style="margin-top: 0; color: var(--indigo); margin-bottom: 0.5rem;">إعادة تعيين كلمة المرور</h2>
+      
+      <!-- المرحلة 1: كتابة الإيميل -->
+      <div id="reset-step-1">
+        <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">اكتب بريدك الإلكتروني للبحث عن حسابك.</p>
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <input type="email" id="reset-email" dir="ltr" style="width: 100%; padding: 0.8rem; border: 1px solid var(--line); border-radius: 8px; margin-top: 0.5rem;">
+        </div>
+        <p id="reset-msg-1" class="alert" hidden style="margin-top: 1rem;"></p>
+        <div class="row" style="justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" id="find-account-btn" class="btn inline">التالي</button>
+          <button type="button" class="btn inline ghost" onclick="document.getElementById('reset-dialog').close()">إلغاء</button>
+        </div>
+      </div>
+
+      <!-- المرحلة 2: السؤال السري والباسورد الجديد -->
+      <div id="reset-step-2" style="display: none;">
+        <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">أجب على السؤال السري لتعيين كلمة مرور جديدة.</p>
+        
+        <div class="field">
+          <label>السؤال السري</label>
+          <div id="security-question-text" style="padding: 0.8rem; background: var(--paper); border-radius: 8px; border: 1px solid var(--line); font-weight: bold; margin-bottom: 1rem;">...</div>
+        </div>
+        
+        <div class="field">
+          <label>الإجابة</label>
+          <input type="text" id="reset-answer" style="width: 100%; padding: 0.8rem; border: 1px solid var(--line); border-radius: 8px; margin-top: 0.5rem;">
+        </div>
+        
+        <div class="field" style="margin-top: 1rem;">
+          <label>كلمة المرور الجديدة</label>
+          <input type="password" id="reset-new-pass" dir="ltr" style="width: 100%; padding: 0.8rem; border: 1px solid var(--line); border-radius: 8px; margin-top: 0.5rem;">
+        </div>
+        
+        <p id="reset-msg-2" class="alert" hidden style="margin-top: 1rem;"></p>
+        <div class="row" style="justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" id="reset-password-btn" class="btn inline">حفظ الباسورد</button>
+          <button type="button" class="btn inline ghost" onclick="document.getElementById('reset-dialog').close()">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/loader.js"></script>
+  
+  <script>
+    const form = document.getElementById('login-form');
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('login-btn');
+    function showError(text) { msg.textContent = text; msg.hidden = false; }
+    
+    // فتح نافذة إعادة التعيين
+    document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('reset-step-1').style.display = 'block';
+      document.getElementById('reset-step-2').style.display = 'none';
+      document.getElementById('reset-email').value = '';
+      document.getElementById('reset-answer').value = '';
+      document.getElementById('reset-new-pass').value = '';
+      document.getElementById('reset-msg-1').hidden = true;
+      document.getElementById('reset-msg-2').hidden = true;
+      document.getElementById('reset-dialog').showModal();
+    });
+
+    let resetEmail = '';
+
+    // الخطوة 1: البحث عن الحساب وجلب السؤال
+    document.getElementById('find-account-btn').addEventListener('click', async () => {
+      const email = document.getElementById('reset-email').value.trim();
+      const msg1 = document.getElementById('reset-msg-1');
+      const btn1 = document.getElementById('find-account-btn');
+      
+      if (!email) { msg1.textContent = 'اكتب الإيميل أولاً.'; msg1.className = 'alert'; msg1.hidden = false; return; }
+      
+      btn1.disabled = true; btn1.textContent = 'جاري البحث...'; msg1.hidden = true;
+      
+      try {
+        const { data, error } = await sb.functions.invoke('admin-users', { body: { action: 'get_question', email } });
+        
+        if (error) {
+          let errorMsg = 'حدث خطأ غير متوقع في الاتصال.';
+          try {
+            // محاولة استخراج الرسالة الحقيقية من السيرفر
+            const errBody = await error.context.json();
+            if (errBody && errBody.error) errorMsg = errBody.error;
+          } catch (e) {
+            errorMsg = error.message || errorMsg;
+          }
+          msg1.textContent = 'خطأ: ' + errorMsg;
+          msg1.className = 'alert'; msg1.hidden = false;
+          return;
+        }
+        if (data && data.error) {
+          msg1.textContent = 'خطأ: ' + data.error;
+          msg1.className = 'alert'; msg1.hidden = false;
+          return;
+        }
+        
+        resetEmail = email;
+        document.getElementById('security-question-text').textContent = data.question;
+        document.getElementById('reset-step-1').style.display = 'none';
+        document.getElementById('reset-step-2').style.display = 'block';
+      } catch (err) {
+        msg1.textContent = 'مشكلة في الاتصال بالخادم.'; msg1.className = 'alert'; msg1.hidden = false;
+      } finally {
+        btn1.disabled = false; btn1.textContent = 'التالي';
+      }
+    });
+
+    // الخطوة 2: التحقق من الإجابة وتغيير الباسورد
+    document.getElementById('reset-password-btn').addEventListener('click', async () => {
+      const answer = document.getElementById('reset-answer').value.trim();
+      const newPass = document.getElementById('reset-new-pass').value;
+      const msg2 = document.getElementById('reset-msg-2');
+      const btn2 = document.getElementById('reset-password-btn');
+      
+      if (!answer || newPass.length < 8) { 
+        msg2.textContent = 'اكتب الإجابة وباسورد لا يقل عن 8 حروف.'; 
+        msg2.className = 'alert'; msg2.hidden = false; 
+        return; 
+      }
+      
+      btn2.disabled = true; btn2.textContent = 'جاري الحفظ...'; msg2.hidden = true;
+      
+      try {
+        const { data, error } = await sb.functions.invoke('admin-users', { 
+          body: { action: 'reset_with_answer', email: resetEmail, answer, password: newPass } 
+        });
+        
+        if (error || data?.error) {
+          msg2.textContent = data?.error || 'حدث خطأ.';
+          msg2.className = 'alert'; msg2.hidden = false;
+          return;
+        }
+        
+        msg2.textContent = 'تم تغيير الباسورد بنجاح! جاري تحويلك...';
+        msg2.className = 'alert ok'; msg2.hidden = false;
+        
+        setTimeout(() => { 
+          document.getElementById('reset-dialog').close(); 
+          document.getElementById('email').value = resetEmail; // بنحط الايميل في خانة الدخول عشان يريحه
+          document.getElementById('password').focus();
+        }, 2000);
+      } catch (err) {
+        msg2.textContent = 'مشكلة في الاتصال بالخادم.'; msg2.className = 'alert'; msg2.hidden = false;
+      } finally {
+        btn2.disabled = false; btn2.textContent = 'حفظ الباسورد';
+      }
+    });
+
+    // كود تسجيل الدخول العادي
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); msg.hidden = true;
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) return showError('اكتب البريد الإلكتروني وكلمة المرور.');
+      btn.disabled = true; btn.textContent = 'جاري الدخول...';
+      try {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) return showError('البريد أو كلمة المرور غلط.');
+        const { data: profile, error: profileError } = await sb.from('profiles').select('is_active').eq('id', data.user.id).maybeSingle();
+        if (profileError || !profile || !profile.is_active) { await sb.auth.signOut(); return showError('حسابك مش مفعّل.'); }
+        location.replace('index.html');
+      } catch (err) { showError('مفيش اتصال بالخادم.'); } 
+      finally { btn.disabled = false; btn.textContent = 'تسجيل الدخول'; }
+    });
+  </script>
+</body>
+</html>

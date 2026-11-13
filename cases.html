@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>القضايا | المستشار</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=El+Messiri:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- ربط ملف الستايل الأساسي -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- الستايل الخاص بالصفحة دي بس -->
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem; align-items: start; }
+    .field { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; }
+    
+    .form-section { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+    .section-title { font-size: 1.15rem; color: var(--ink); margin-top: 0; margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--paper); font-family: var(--font-head); display: flex; justify-content: space-between; align-items: center; }
+    .link-case-box { background: var(--paper); border: 1px dashed var(--indigo-soft); padding: 1rem; border-radius: 8px; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.8rem; }
+    .link-case-box label { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: var(--indigo); cursor: pointer; }
+    .parties-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .party-card { background: var(--paper); border: 1px solid var(--line); padding: 1rem; border-radius: 8px; position: relative; display: flex; flex-direction: column; gap: 0.8rem; }
+    .party-card .btn-remove { position: absolute; top: 0.5rem; left: 0.5rem; }
+    
+    .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 2px solid var(--line); padding-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
+    .detail-header h1 { margin: 0; font-size: 1.8rem; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+    @media (max-width: 800px) { .detail-grid { grid-template-columns: 1fr; } }
+    .info-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.2rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+    .info-card h3 { margin-top: 0; color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.1rem; }
+    .kv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .kv-grid div { font-size: 0.95rem; }
+    .kv-grid strong { display: block; color: var(--ink-soft); font-size: 0.85rem; font-weight: 500; }
+    .timeline { list-style: none; padding: 0; margin: 0; position: relative; }
+    .timeline::before { content: ''; position: absolute; top: 0; bottom: 0; right: 1rem; width: 2px; background: var(--line); }
+    .timeline-item { position: relative; padding-right: 2.5rem; margin-bottom: 1.5rem; }
+    .timeline-item::before { content: ''; position: absolute; right: 0.7rem; top: 0.3rem; width: 0.8rem; height: 0.8rem; border-radius: 50%; background: var(--brass); border: 2px solid var(--surface); box-shadow: 0 0 0 2px var(--brass); }
+    .timeline-date { font-weight: 700; color: var(--ink); font-size: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .timeline-card { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 0.8rem; margin-top: 0.4rem; }
+    .timeline-card p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+    .timeline-card .next-date { font-size: 0.85rem; color: var(--stamp); font-weight: 600; }
+    .task-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--line); }
+    .task-item:last-child { border-bottom: 0; }
+    .task-item.done span { text-decoration: line-through; color: #aaa; }
+    .task-item input[type="checkbox"] { width: 1.2rem; height: 1.2rem; accent-color: var(--ok); cursor: pointer; }
+    .task-item span { flex: 1; font-size: 0.95rem; }
+    .task-item.overdue span { color: var(--stamp); font-weight: bold; }
+    .finance-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+    .fin-box { background: var(--paper); border-radius: 8px; padding: 0.8rem; text-align: center; border: 1px solid var(--line); }
+    .fin-box span { display: block; font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 0.3rem; }
+    .fin-box strong { font-size: 1.1rem; color: var(--ink); font-family: var(--font-head); }
+    .fin-box.paid strong { color: var(--ok); }
+    .fin-box.rem strong { color: var(--stamp); }
+    .payment-list { list-style: none; padding: 0; margin: 0; }
+    .payment-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px dashed var(--line); font-size: 0.9rem; }
+    .payment-item:last-child { border-bottom: 0; }
+    .wa-btn { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #25D366; color: white; text-decoration: none; margin-right: 0.5rem; transition: 0.2s; }
+    .wa-btn:hover { transform: scale(1.1); filter: brightness(1.1); }
+    .wa-btn svg { width: 14px; height: 14px; fill: currentColor; }
+    
+    .judgment-box { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 8px; margin-top: 1rem; grid-column: 1 / -1; }
+    .judgment-box label { color: #166534; font-weight: bold; }
+
+    @media print {
+      .topbar, .btn, .notif-wrapper, .toast, .subhead, #add-view, #list-view, .timeline::before, dialog, .btn small, .wa-btn { display: none !important; }
+      body { background: #fff; color: #000; font-size: 12pt; }
+      .container { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+      .detail-grid { display: block; }
+      .info-card { border: 1px solid #ccc !important; box-shadow: none !important; margin-bottom: 1rem !important; break-inside: avoid; }
+      .info-card h3 { color: #000 !important; border-bottom: 1px solid #000 !important; }
+      .kv-grid strong { color: #555 !important; }
+      .timeline-item { padding-right: 0; margin-bottom: 1rem; break-inside: avoid; }
+      .timeline-item::before { display: none; }
+      .timeline-card { background: #f9f9f9 !important; border: 1px solid #ccc !important; }
+      .timeline-date { border-bottom: 1px solid #ccc; padding-bottom: 0.2rem; margin-bottom: 0.5rem; }
+      .finance-summary { grid-template-columns: 1fr 1fr 1fr; }
+      .fin-box { border: 1px solid #ccc !important; background: #fff !important; }
+      .print-header { display: block !important; text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #000; padding-bottom: 1rem; }
+      .print-header h1 { margin: 0; font-size: 2rem; color: #000; }
+      .print-header p { margin: 0.5rem 0 0; font-size: 1rem; color: #555; }
+    }
+    .print-header { display: none; }
+  </style>
+</head>
+<body>
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand">المستشار</div>
+      <div class="global-search-wrapper">
+        <input type="search" id="global-search-input" placeholder="بحث سريع..." autocomplete="off">
+        <div id="global-search-results" class="global-search-results"></div>
+      </div>
+      <nav class="topnav">
+        <a href="index.html"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><span>الرئيسية</span></a>
+        <a href="clients.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.4.2 4 1.7 4.5 4.3"/></svg><span>الموكلين</span></a>
+        <a href="cases.html" aria-current="page"><svg class="ico" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 16h5"/></svg><span>القضايا</span></a>
+        <a href="agenda.html"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>الأجندة</span></a>
+        <a href="documents.html"><svg class="ico" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>الأرشيف</span></a>
+        <a href="reports.html"><svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>التقارير</span></a>
+        <a id="admin-link" href="admin.html" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 5 6v5.5c0 4.2 2.9 7.6 7 9.5 4.1-1.9 7-5.3 7-9.5V6l-7-3Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg><span>المدير</span></a>
+      </nav>
+      <div class="user-box">
+        <button class="theme-toggle" type="button"></button>
+        <a href="profile.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;" title="ملفي الشخصي">
+         <span id="user-avatar" class="avatar"></span>
+        <span id="user-name"></span>
+        </a>
+        <span id="user-role" class="role-tag"></span>
+        <button id="logout-btn" type="button" class="btn btn-quiet">تسجيل الخروج</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <p id="toast" class="alert toast" role="status" hidden></p>
+
+      <div id="list-view">
+        <h1>القضايا</h1>
+        <div class="toolbar" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+          <input id="search" type="search" placeholder="ابحث برقم القضية أو المحكمة..." style="flex: 1;">
+          <button id="btn-add-case" type="button" class="btn inline">إضافة قضية جديدة +</button>
+        </div>
+        <div class="card">
+          <ul id="cases-list" class="ledger wide"></ul>
+        </div>
+      </div>
+
+      <div id="add-view" hidden>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button type="button" class="btn inline ghost" onclick="showList()">&rarr; رجوع</button>
+            <h1 style="margin: 0;" id="form-title">إضافة قضية</h1>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem; background: var(--paper); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--line);">
+            <button type="button" class="btn inline" style="background: #475569;" onclick="document.getElementById('file-docs').click()">رفع مستندات / سكانر 📄</button>
+            <input id="file-docs" type="file" multiple hidden>
+            <span class="muted" id="docs-status" style="font-size: 0.9rem;">لم يتم اختيار ملفات.</span>
+          </div>
+        </div>
+        
+        <form id="case-form" novalidate>
+          <div class="form-section">
+            <h3 class="section-title">1. تصنيف القضية والدرجة</h3>
+            <div class="grid">
+              <div class="field">
+                <label for="c-type">نوع القضية</label>
+                <select id="c-type" required onchange="updateDynamicDropdowns()">
+                  <option value="civil">مدني</option>
+                  <option value="criminal">جنائي (جنح / جنايات)</option>
+                  <option value="family">أسرة</option>
+                  <option value="labor">عمال</option>
+                  <option value="commercial">تجاري</option>
+                  <option value="administrative">إداري</option>
+                  <option value="other">أخرى</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="c-degree">درجة التقاضي</label>
+                <select id="c-degree" required onchange="toggleDegreeOptions()"></select>
+              </div>
+              <div class="field" id="sub-type-box"><label for="c-subtype">الاختصاص الفرعي</label><select id="c-subtype" required></select></div>
+              
+              <div class="field" id="other-type-box" style="display: none;">
+                <label for="c-other-type">نوع الدعوى (اكتب بنفسك)</label>
+                <input id="c-other-type" type="text" placeholder="مثال: دعوى تعويض عن حادث...">
+              </div>
+
+              <div class="field"><label for="c-dept">القسم</label><select id="c-dept" disabled style="background: var(--paper);"></select></div>
+            </div>
+
+            <div id="prosecution-box" class="grid" style="margin-top: 1rem; display: none;">
+              <div class="field"><label for="c-prosecution">النيابة / جهة التحقيق</label><input id="c-prosecution" type="text" placeholder="مثال: نيابة قصر النيل / مركز الشرطة"></div>
+              <div class="field"><label for="c-police-report">رقم المحضر / العرائض</label><input id="c-police-report" type="text" placeholder="مثال: 1234 لسنة 2026 إداري/إصرار"></div>
+            </div>
+
+            <div id="parent-case-wrapper" class="link-case-box" style="display: none;">
+              <label><input type="checkbox" id="c-link-parent-check" onchange="toggleParentSelect()"> هذه القضية مرتبطة بقضية سابقة في المكتب</label>
+              <select id="c-parent-case" style="display: none; border-color: var(--indigo);"><option value="">— اختر القضية الأصلية —</option></select>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">2. الأطراف والخصوم</h3>
+            <div class="grid">
+              <div class="field"><label for="c-client">الموكل</label><select id="c-client" required></select></div>
+              <div class="field">
+                <label for="c-client-role">صفة الموكل</label>
+                <select id="c-client-role" required></select>
+              </div>
+              <div class="field"><label for="c-poa">التوكيل المستخدم</label><select id="c-poa"><option value="">— اختر الموكل أولاً —</option></select></div>
+              <div class="field"><label for="c-lawyer">المحامي المسؤول</label><select id="c-lawyer"></select></div>
+              <div class="field"><label for="c-opponent-lawyer">محامي الخصم</label><input id="c-opponent-lawyer" type="text"></div>
+            </div>
+            <div style="margin-top: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                <h4 style="margin: 0; color: var(--ink-soft);">قائمة الخصوم والأطراف</h4>
+                <button type="button" class="btn small ghost" onclick="addPartyRow()">+ إضافة طرف</button>
+              </div>
+              <div id="parties-container" class="parties-grid"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">3. بيانات القضية والمحكمة</h3>
+            <div class="grid">
+              <div class="field"><label for="c-number">رقم القضية</label><input id="c-number" type="text" required></div>
+              <div class="field"><label for="c-year">السنة</label><input id="c-year" type="number" required></div>
+              <div class="field"><label for="c-court-type">نوع المحكمة / الدائرة</label><select id="c-court-type" required></select></div>
+              <div class="field"><label for="c-court">اسم المحكمة</label><input id="c-court" type="text" list="courts-list" required><datalist id="courts-list"></datalist></div>
+              <div class="field"><label for="c-roll-number">رقم الرول</label><input id="c-roll-number" type="text"></div>
+              <div class="field"><label for="c-courtroom">القاعة / القاضي</label><input id="c-courtroom" type="text"></div>
+              <div class="field" id="claim-value-box"><label for="c-claim-value">قيمة الدعوى</label><input id="c-claim-value" type="number" min="0"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">4. التواريخ وحالة القضية والمواعيد الإجرائية</h3>
+            <div class="grid">
+              <div class="field"><label for="c-filing-date">تاريخ رفع الدعوى / القيد</label><input id="c-filing-date" type="date"></div>
+              <div class="field"><label for="c-first-hearing">تاريخ أول جلسة</label><input id="c-first-hearing" type="date"></div>
+              <div class="field"><label for="c-next-hearing">الجلسة القادمة (تظهر بالأجندة)</label><input id="c-next-hearing" type="date"></div>
+              <div class="field"><label for="c-appeal-deadline">ميعاد الطعن / الاستئناف الحاسم</label><input id="c-appeal-deadline" type="date"></div>
+              <div class="field"><label for="c-status">حالة القضية</label><select id="c-status"><option value="open">متداولة</option><option value="reserved">محجوزة للحكم</option><option value="judged">محكوم فيها</option><option value="archived">مؤرشفة</option></select></div>
+              
+              <div class="field" style="grid-column: 1 / -1;">
+                <label for="c-charge">التهمة (أو وصف الموضوع)</label>
+                <input id="c-charge" type="text" placeholder="اكتب التهمة أو وصف الموضوع هنا...">
+              </div>
+
+              <div class="field judgment-box">
+                <label for="c-judgment">الحكم أو القرار النهائي</label>
+                <textarea id="c-judgment" placeholder="اكتب منطوق الحكم أو القرار هنا..." style="min-height: 80px;"></textarea>
+              </div>
+              
+              <div class="field" style="grid-column: 1 / -1;"><label for="c-subject">ملاحظات إضافية</label><textarea id="c-subject" style="min-height: 60px;"></textarea></div>
+            </div>
+          </div>
+
+          <div class="form-section" style="background: #f0fdf4; border-color: #bbf7d0;">
+            <h3 class="section-title" style="color: #166534; border-color: #bbf7d0;">5. الأتعاب والمصروفات النثرية</h3>
+            <div class="grid">
+              <div class="field"><label for="c-client-fees">أتعاب الموكل (الإجمالي)</label><input id="c-client-fees" type="number" placeholder="مثال: 10000"></div>
+              <div class="field"><label for="c-court-fees">رسوم المحكمة</label><input id="c-court-fees" type="number"></div>
+              <div class="field"><label for="c-petty-expenses">المصروفات النثرية والإعلانات</label><input id="c-petty-expenses" type="number" placeholder="انتقالات، صور رسمية..."></div>
+            </div>
+          </div>
+
+          <p id="case-error" class="alert" role="alert" hidden></p>
+          <div class="row" style="justify-content: flex-end; margin-bottom: 3rem;">
+            <button id="case-save" type="submit" class="btn inline" style="padding: 0.8rem 2rem; font-size: 1.1rem;">حفظ القضية</button>
+            <button type="button" class="btn inline ghost" onclick="showList()">إلغاء</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="details-view" hidden>
+        <div class="print-header">
+          <h1>مكتب المستشار - ملف القضية</h1>
+          <p>تاريخ الطباعة: <span id="print-date"></span></p>
+        </div>
+        
+        <div class="detail-header">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button type="button" class="btn inline ghost" onclick="showList()">&rarr; رجوع</button>
+            <h1 id="d-title">قضية رقم ...</h1>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn inline ghost" style="background: #e2e8f0;" onclick="document.getElementById('d-file-docs').click()" id="btn-add-doc">📄 + إضافة مستند</button>
+            <input id="d-file-docs" type="file" multiple hidden>
+            <button type="button" class="btn inline" style="background: #374151;" onclick="window.print()">طباعة الملف 🖨️</button>
+            <button type="button" class="btn inline" onclick="openSessionDialog()" id="btn-add-session">قرار جلسة</button>
+            <button type="button" class="btn inline ghost" onclick="editCase()" id="btn-edit-case">تعديل القضية</button>
+            <button type="button" class="btn inline danger" onclick="deleteCurrentCase()" id="btn-delete-case">حذف</button>
+            <span id="d-status" class="tag"></span>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <div class="info-card"><h3>البيانات الأساسية</h3><div class="kv-grid" id="d-info"></div></div>
+            <div class="info-card" style="border-color: #bbf7d0; background: #f0fdf4;">
+              <h3 style="color: #166534; border-color: #bbf7d0;">الخزينة والمدفوعات</h3>
+              <div class="finance-summary" id="d-finance-summary"></div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h4 style="margin: 0; font-size: 0.95rem; color: var(--ink-soft);">سجل الدفعات:</h4>
+                <button type="button" class="btn small" style="background: #166534; border-color: #166534;" onclick="openPaymentDialog()" id="btn-add-payment">+ إضافة دفعة</button>
+              </div>
+              <ul class="payment-list" id="d-payments-list"></ul>
+            </div>
+            <div class="info-card"><h3>الأطراف والخصوم</h3><div id="d-parties"></div></div>
+            <div class="info-card">
+              <h3>المستندات</h3>
+              <ul id="d-docs-list" class="docs"></ul>
+            </div>
+          </div>
+          <div>
+            <div class="info-card">
+              <h3>المهام (To-Do)</h3>
+              <form id="task-form" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                <input type="text" id="t-title" placeholder="اسم المهمة..." style="flex: 1 1 200px; padding: 0.4rem; border: 1px solid var(--line); border-radius: 6px;" required>
+                <input type="date" id="t-due" style="width: auto; padding: 0.4rem; border: 1px solid var(--line); border-radius: 6px;" title="تاريخ التسليم">
+                <button type="submit" class="btn small" id="btn-add-task">إضافة</button>
+              </form>
+              <ul id="d-tasks-list" style="list-style: none; padding: 0; margin: 0;"></ul>
+            </div>
+            <div class="info-card"><h3>سجل الجلسات (Timeline)</h3><ul class="timeline" id="d-sessions-list"></ul></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="session-dialog">
+    <div class="dialog-body" style="max-width: 500px;">
+      <h2 style="margin-top: 0; color: var(--ink);" id="session-dialog-title">إضافة قرار جلسة</h2>
+      <form id="session-form" novalidate>
+        <input type="hidden" id="s-edit-id">
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="field"><label>تاريخ الجلسة</label><input type="date" id="s-date" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+          <div class="field"><label>الجلسة القادمة (التأجيل)</label><input type="date" id="s-next-date" style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+          <div class="field" style="grid-column: 1 / -1;"><label>القرار / ما تم في الجلسة</label><input type="text" id="s-decision" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+          <div class="field" style="grid-column: 1 / -1;"><label>ملاحظات إضافية</label><textarea id="s-notes" style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px; min-height: 80px;"></textarea></div>
+        </div>
+        <div class="row" style="justify-content: flex-end; margin-top: 1rem;">
+          <button type="submit" class="btn inline" style="background: var(--indigo);">حفظ القرار</button>
+          <button type="button" class="btn inline ghost" onclick="document.getElementById('session-dialog').close()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="payment-dialog">
+    <div class="dialog-body" style="max-width: 400px;">
+      <h2 style="margin-top: 0; color: #166534;">إضافة دفعة جديدة</h2>
+      <form id="payment-form" novalidate>
+        <div class="field"><label>المبلغ (جنيه)</label><input type="number" id="p-amount" required min="1" style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+        <div class="field"><label>تاريخ الدفعة</label><input type="date" id="p-date" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+        <div class="field"><label>ملاحظات (اختياري)</label><input type="text" id="p-notes" style="width: 100%; padding: 0.5rem; border: 1px solid var(--line); border-radius: 8px;"></div>
+        <div class="row" style="justify-content: flex-end; margin-top: 1rem;">
+          <button type="submit" class="btn inline" style="background: #166534; border-color: #166534;">حفظ الدفعة</button>
+          <button type="button" class="btn inline ghost" onclick="document.getElementById('payment-dialog').close()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- المكتبات الأساسية -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+  
+  <!-- الملفات المشتركة -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/global-search.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/loader.js"></script> 
+   <script src="js/realtime-notifications.js"></script>
+  <!-- ملف الجافاسكريبت الخاص بالصفحة دي -->
+  <script src="js/cases.js"></script>
+  <script src="js/requests.js"></script>
+    <script src="js/attendance.js"></script>
+</body>
+</html>
